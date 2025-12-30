@@ -14,28 +14,24 @@ export function MinimalFooter() {
     const year = new Date().getFullYear();
 
     const company = [
-        { title: 'About Us', href: '#' },
-        { title: 'Careers', href: '#' },
-        { title: 'Brand assets', href: '#' },
-        { title: 'Privacy Policy', href: '#' },
-        { title: 'Terms of Service', href: '#' },
+        { title: 'About Us', href: '#home' },
+        { title: 'Careers', href: '#home' },
+        { title: 'Brand assets', href: '#generator' },
+        { title: 'Privacy Policy', href: '#features' },
+        { title: 'Terms of Service', href: '#features' },
     ];
 
     const resources = [
-        { title: 'Blog', href: '#' },
-        { title: 'Help Center', href: '#' },
-        { title: 'Contact Support', href: '#' },
-        { title: 'Community', href: '#' },
-        { title: 'Security', href: '#' },
+        { title: 'Blog', href: '#home' },
+        { title: 'Help Center', href: '#features' },
+        { title: 'Contact Support', href: '#feedback' },
+        { title: 'Community', href: '#saved' },
+        { title: 'Security', href: '#features' },
     ];
 
     const socialLinks = [
-        { icon: <Facebook className="w-4 h-4" />, link: '#', label: 'Facebook' },
-        { icon: <Github className="w-4 h-4" />, link: '#', label: 'Github' },
-        { icon: <Instagram className="w-4 h-4" />, link: '#', label: 'Instagram' },
-        { icon: <Linkedin className="w-4 h-4" />, link: '#', label: 'LinkedIn' },
-        { icon: <Twitter className="w-4 h-4" />, link: '#', label: 'Twitter' },
-        { icon: <Youtube className="w-4 h-4" />, link: '#', label: 'Youtube' },
+        { icon: <Github className="w-4 h-4" />, link: 'https://github.com/Sourodip-1', label: 'Github' },
+        { icon: <Twitter className="w-4 h-4" />, link: 'https://x.com/sshahaider', label: 'Twitter' },
     ];
 
     const containerVariants = {
