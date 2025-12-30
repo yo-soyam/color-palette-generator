@@ -3,6 +3,15 @@ import { useState, useEffect } from 'react'
 function App() {
   const [palette, setPalette] = useState([])
   const [savedPalettes, setSavedPalettes] = useState([])
+  const [theme, setTheme] = useState('light')
+
+  useEffect(() => {
+    document.body.setAttribute('data-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'demo' : 'light')
+  }
 
   useEffect(() => {
     fetchSavedPalettes()
@@ -12,9 +21,10 @@ function App() {
   const fetchSavedPalettes = async () => {
     try {
       const response = await fetch('/api/palettes').then(res => res.json())
-      setSavedPalettes(response.data)
+      setSavedPalettes(Array.isArray(response) ? response : (response.data || []))
     } catch (error) {
       console.error('Error:', error)
+      setSavedPalettes([])
     }
   }
 
@@ -50,7 +60,18 @@ function App() {
 
   return (
     <div className="container">
-      <h1 style={{ textAlign: 'center', margin: '20px 0' }}>🎨 Color Palette Generator</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
+        <h1 style={{ margin: 0 }}>🎨 Color Palette Generator</h1>
+        <button 
+          onClick={toggleTheme}
+          style={{ 
+            backgroundColor: theme === 'light' ? '#333' : '#fff', 
+            color: theme === 'light' ? '#fff' : '#333' 
+          }}
+        >
+          {theme === 'light' ? '🌙 Demo Theme' : '☀️ Light Mode'}
+        </button>
+      </div>
 
       <div className="card">
         <h2>Current Palette</h2>
@@ -75,15 +96,15 @@ function App() {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={generatePalette} style={{ flex: 1 }}>🔄 Generate New</button>
-          <button onClick={savePalette} style={{ flex: 1, backgroundColor: '#28a745' }}>💾 Save Palette</button>
+          <button onClick={savePalette} style={{ flex: 1, backgroundColor: 'var(--success-color)' }}>💾 Save Palette</button>
         </div>
       </div>
 
-      {savedPalettes.length > 0 && (
+      {savedPalettes?.length > 0 && (
         <div className="card">
           <h2>Saved Palettes ({savedPalettes.length})</h2>
           {savedPalettes.map(p => (
-            <div key={p.id} style={{ marginBottom: '15px', padding: '15px', background: '#f8f9fa', borderRadius: '8px' }}>
+            <div key={p.id} style={{ marginBottom: '15px', padding: '15px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
               <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
                 {p.colors.map((color, i) => (
                   <div
@@ -99,7 +120,7 @@ function App() {
                   />
                 ))}
               </div>
-              <button onClick={() => deletePalette(p.id)} style={{ backgroundColor: '#dc3545', width: '100%' }}>
+              <button onClick={() => deletePalette(p.id)} style={{ backgroundColor: 'var(--danger-color)', width: '100%' }}>
                 Delete
               </button>
             </div>
