@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Copy, Plus, Minus, Lock, Unlock } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { Home, Palette, Save, Heart } from 'lucide-react'
-import { AnimeNavBar } from '@/components/ui/anime-navbar'
+import { AnimeNavBar } from '@/components/ui/anime-navbar.tsx'
+import { FeedbackSection } from '@/components/FeedbackSection'
 
 function App() {
   const [colors, setColors] = useState({
@@ -29,7 +30,36 @@ function App() {
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+
+    const isNewThemeDark = newTheme === 'dark';
+
+    // Helper to adjust lightness for contrast
+    const adjustForContrast = (hexColor) => {
+      const { h, s, l } = hexToHslValues(hexColor);
+      let newL = l;
+
+      if (isNewThemeDark) {
+        // Dark Mode: Needs brighter colors (Pastel/Neon) -> Min Lightness 50%
+        newL = Math.max(l, 50);
+      } else {
+        // Light Mode: Needs darker colors -> Max Lightness 60%
+        newL = Math.min(l, 60);
+      }
+      return hslToHex(h, s, newL);
+    };
+
+    const newColors = {
+      background: colors.text,
+      text: colors.background,
+      primary: adjustForContrast(colors.primary),
+      secondary: adjustForContrast(colors.secondary),
+      accent: adjustForContrast(colors.accent)
+    };
+
+    setColors(newColors);
+    applyTheme(newColors);
   }
 
   useEffect(() => {
@@ -47,8 +77,8 @@ function App() {
     }
   }
 
-  // Helper to convert hex to HSL for CSS variables
-  const hexToHsl = (hex) => {
+  // Helper to parse Hex to HSL values object
+  const hexToHslValues = (hex) => {
     let r = 0, g = 0, b = 0;
     if (hex.length === 4) {
       r = "0x" + hex[1] + hex[1];
@@ -82,6 +112,12 @@ function App() {
     s = +(s * 100).toFixed(1);
     l = +(l * 100).toFixed(1);
 
+    return { h, s, l };
+  }
+
+  // Helper to convert hex to HSL for CSS variables
+  const hexToHsl = (hex) => {
+    const { h, s, l } = hexToHslValues(hex);
     return `${h} ${s}% ${l}%`;
   }
 
@@ -201,18 +237,18 @@ function App() {
       .then(() => alert(`Copied ${color} to clipboard!`))
       .catch(err => console.error('Failed to copy:', err));
   };
-    alert(`Copied ${color} to clipboard!`)
-  }
+
 
   const navItems = [
     { name: "Home", url: "#", icon: Home },
     { name: "Generate", url: "#", icon: Palette },
     { name: "Saved", url: "#", icon: Save },
-    { name: "Feedback", url: "#", icon: Heart },
+    { name: "Feedback", url: "#feedback", icon: Heart },
   ]
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 transition-colors duration-500">
+      <AnimeNavBar items={navItems} defaultActive="Generate" theme={theme} toggleTheme={toggleTheme} />
       <Hero onGenerate={generateRandomPalette} />
 
       <FeatureSection />
@@ -260,37 +296,6 @@ function App() {
           <div className="flex-1 bg-card/30 rounded-3xl border border-border p-2 shadow-inner">
             <BentoPreview />
           </div>
-    <>
-      <AnimeNavBar items={navItems} defaultActive="Generate" theme={theme} toggleTheme={toggleTheme} />
-      <div className="container" style={{ paddingTop: '100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
-        <h1 style={{ margin: 0 }}>🎨 Color Palette Generator</h1>
-      </div>
-
-      <div className="card">
-        <h2>Current Palette</h2>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          {palette.map((color, i) => (
-            <div key={i} style={{ flex: 1, textAlign: 'center' }}>
-              <div
-                style={{
-                  height: '150px',
-                  backgroundColor: color,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  border: '2px solid #ddd'
-                }}
-                onClick={() => copyColor(color)}
-              />
-              <p style={{ margin: '10px 0', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                {color}
-              </p>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={generatePalette} style={{ flex: 1 }}>🔄 Generate New</button>
-          <button onClick={savePalette} style={{ flex: 1, backgroundColor: 'var(--success-color)' }}>💾 Save Palette</button>
         </div>
       </div>
 
@@ -341,6 +346,8 @@ function App() {
         )}
       </div>
 
+      <FeedbackSection />
+
       <Toolbar
         colors={colors}
         onGenerate={generateRandomPalette}
@@ -348,35 +355,6 @@ function App() {
         onColorChange={handleColorChange}
       />
     </div>
-      {savedPalettes?.length > 0 && (
-        <div className="card">
-          <h2>Saved Palettes ({savedPalettes.length})</h2>
-          {savedPalettes.map(p => (
-            <div key={p.id} style={{ marginBottom: '15px', padding: '15px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
-                {p.colors.map((color, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      flex: 1,
-                      height: '60px',
-                      backgroundColor: color,
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => copyColor(color)}
-                  />
-                ))}
-              </div>
-              <button onClick={() => deletePalette(p.id)} style={{ backgroundColor: 'var(--danger-color)', width: '100%' }}>
-                Delete
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      </div>
-    </>
   )
 }
 

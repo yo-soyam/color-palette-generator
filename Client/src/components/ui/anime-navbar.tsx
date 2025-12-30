@@ -71,8 +71,16 @@ export function AnimeNavBar({ items, className, defaultActive = "Home", theme, t
                                 key={item.name}
                                 href={item.url}
                                 onClick={(e) => {
-                                    e.preventDefault()
-                                    setActiveTab(item.name)
+                                    if (item.url.startsWith('#')) {
+                                        e.preventDefault()
+                                        const element = document.querySelector(item.url)
+                                        if (element) {
+                                            element.scrollIntoView({ behavior: 'smooth' })
+                                        }
+                                        setActiveTab(item.name)
+                                    } else {
+                                        setActiveTab(item.name)
+                                    }
                                 }}
                                 onMouseEnter={() => {
                                     if (leaveTimeout.current) clearTimeout(leaveTimeout.current)

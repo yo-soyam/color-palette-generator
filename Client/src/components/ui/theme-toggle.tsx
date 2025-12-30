@@ -12,7 +12,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
             <input
                 id="input"
                 type="checkbox"
-                checked={theme === 'demo'}
+                checked={theme === 'dark'}
                 onChange={toggleTheme}
             />
             <div className="slider round">

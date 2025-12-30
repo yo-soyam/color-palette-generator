@@ -73,7 +73,12 @@ export const Hero = React.memo(function Hero({ onGenerate }) {
                         <Button variant="default" size="lg" onClick={handleGenerate}>
                             Generate Now
                         </Button>
-                        <Button variant="outline" size="lg" onClick={() => document.getElementById('generator').scrollIntoView({ behavior: 'smooth' })}>
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="border-2 border-solid border-primary text-primary hover:bg-primary hover:text-white dark:hover:text-black font-bold transition-all"
+                            onClick={() => document.getElementById('generator').scrollIntoView({ behavior: 'smooth' })}
+                        >
                             View Saved
                         </Button>
                     </div>
