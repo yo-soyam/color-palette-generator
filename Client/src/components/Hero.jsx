@@ -85,7 +85,7 @@ export const Hero = React.memo(function Hero({ onGenerate }) {
                 </div>
             </div>
             <canvas
-                className="bg-skin-base pointer-events-none absolute inset-0 mx-auto opacity-60"
+                className="bg-skin-base pointer-events-none absolute inset-0 mx-auto"
                 id="canvas"
             ></canvas>
         </section>

@@ -136,7 +136,7 @@ function render() {
         ctx.globalCompositeOperation = "lighter";
 
         if (f) {
-            ctx.strokeStyle = "hsla(" + Math.round(f.update()) + ",100%,50%,0.025)";
+            ctx.strokeStyle = "hsla(" + Math.round(f.update()) + ",100%,50%,0.15)";
         }
 
         ctx.lineWidth = 10;

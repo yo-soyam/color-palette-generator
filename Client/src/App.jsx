@@ -4,6 +4,7 @@ import { Toolbar } from '@/components/Toolbar'
 import { FeatureSection } from '@/components/FeatureSection'
 import { BentoPreview } from '@/components/BentoPreview'
 import { Button } from '@/components/ui/button'
+import AnimatedCopyButton from '@/components/ui/animated-copy-button'
 import { Copy, Plus, Minus, Lock, Unlock } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { Home, Palette, Save, Heart } from 'lucide-react'
@@ -153,43 +154,125 @@ function App() {
   }
 
   const generateRandomPalette = () => {
-    // Semantic generation logic
+    // Advanced Semantic Generation with Design System Presets
     const isDark = theme === 'dark';
+    
+    // Choose a Design System Strategy
+    const strategies = ['material', 'chakra', 'modern'];
+    const strategyName = strategies[Math.floor(Math.random() * strategies.length)];
+    
+    let newColors = {};
 
-    // Background: High lightness for light mode, low for dark
-    const bgH = Math.floor(Math.random() * 360);
-    const bgS = Math.floor(Math.random() * 20); // Low saturation for bg
-    const bgL = isDark ? Math.floor(Math.random() * 15) + 5 : Math.floor(Math.random() * 10) + 90;
+    if (strategyName === 'material') {
+      // Material Design 3 Style
+      // Key feature: Tonal palettes, surface tinting, vibrancy
+      const keyHue = Math.floor(Math.random() * 360);
+      
+      // Material Primary is usually Tonal 40 (light) or Tonal 80 (dark)
+      // but we need a "Main" color. Let's start with a vibrant key.
+      const primS = Math.floor(Math.random() * 20) + 60; // 60-80%
+      const primL = isDark ? 80 : 40; // Pastel in dark, Deep in light
 
-    // Text: Contrast to background
-    const txtH = (bgH + 180) % 360;
-    const txtS = Math.floor(Math.random() * 20);
-    const txtL = isDark ? Math.floor(Math.random() * 10) + 90 : Math.floor(Math.random() * 15) + 5;
+      // Surface: Heavily tinted with the key hue (very low saturation, high/low lightness)
+      const bgH = keyHue;
+      const bgS = Math.floor(Math.random() * 15) + 5; // 5-20% saturation (tinted)
+      const bgL = isDark ? 10 : 98; // Very dark or very light, but colorful
 
-    // Primary: Vibrant
-    const primH = Math.floor(Math.random() * 360);
-    const primS = Math.floor(Math.random() * 40) + 60; // High saturation
-    const primL = Math.floor(Math.random() * 40) + 30; // Medium lightness
+      // Secondary: Analogous or Split, less vibrant
+      const secH = (keyHue + Math.floor(Math.random() * 60) - 30 + 360) % 360; 
+      const secS = Math.floor(Math.random() * 20) + 30; // Muted
+      const secL = isDark ? 70 : 50;
 
-    // Secondary: Complementary or Split
-    const secH = (primH + 180) % 360;
-    const secS = Math.floor(Math.random() * 30) + 40;
-    const secL = Math.floor(Math.random() * 30) + 40;
+      // Tertiary/Accent: Shifted Hue
+      const accH = (keyHue + 120) % 360; // Triadic ish
+      const accS = Math.floor(Math.random() * 20) + 60;
+      const accL = isDark ? 85 : 40;
 
-    // Accent: Analogous or Triadic
-    const accH = (primH + 30) % 360;
-    const accS = Math.floor(Math.random() * 40) + 60;
-    const accL = Math.floor(Math.random() * 30) + 50;
+      // Text: High contrast on surface
+      const txtH = keyHue;
+      const txtS = 5;
+      const txtL = isDark ? 95 : 10;
 
-    const newColors = {
-      text: hslToHex(txtH, txtS, txtL),
-      background: hslToHex(bgH, bgS, bgL),
-      primary: hslToHex(primH, primS, primL),
-      secondary: hslToHex(secH, secS, secL),
-      accent: hslToHex(accH, accS, accL),
-    };
+      newColors = {
+        text: hslToHex(txtH, txtS, txtL),
+        background: hslToHex(bgH, bgS, bgL),
+        primary: hslToHex(keyHue, primS, primL),
+        secondary: hslToHex(secH, secS, secL),
+        accent: hslToHex(accH, accS, accL),
+      };
+
+    } else if (strategyName === 'chakra') {
+      // Chakra UI Style
+      // Key feature: Accessible standard colors (Blue.500, Red.500), Clean Grays (Cool/Warm)
+      
+      // Chakra Grays are sophisticated.
+      const grayHue = [210, 220, 0, 180][Math.floor(Math.random() * 4)]; // Cool, Blueish, Warm, or Neutral
+      const bgS = [0, 5, 10][Math.floor(Math.random() * 3)];
+      const bgL = isDark ? 10 : 100; // Chakra often uses pure white in light mode
+      
+      const txtL = isDark ? 98 : 10; // High contrast
+
+      // Functional Colors: Pick from common Chakra families (Red, Blue, Green, Purple, Teal, Orange)
+      const chakraHues = [0, 28, 45, 120, 170, 210, 270, 320];
+      const primH = chakraHues[Math.floor(Math.random() * chakraHues.length)];
+      // Chakra standard colors are usually around 60-80% Saturation, 50% Lightness
+      const primS = 75;
+      const primL = isDark ? 60 : 50; // A bit lighter in dark mode for a11y
+
+      // Secondary: Another Chakra hue
+      let secH = chakraHues[Math.floor(Math.random() * chakraHues.length)];
+      while(secH === primH) secH = chakraHues[Math.floor(Math.random() * chakraHues.length)];
+      const secS = 65;
+      const secL = isDark ? 55 : 60;
+
+      const accH = (primH + 180) % 360; // Complementary pop
+      const accS = 85;
+      const accL = 50;
+
+      newColors = {
+        text: hslToHex(grayHue, 5, txtL),
+        background: hslToHex(grayHue, bgS, bgL),
+        primary: hslToHex(primH, primS, primL),
+        secondary: hslToHex(secH, secS, secL),
+        accent: hslToHex(accH, accS, accL),
+      };
+
+    } else {
+      // Modern / Geist / Default Style
+      // High contrast, often Black/White backgrounds with neon/sharp accents
+      const bgH = 0;
+      const bgS = 0;
+      const bgL = isDark ? 3 : 100; // Almost pure black or pure white
+
+      const txtH = 0;
+      const txtS = 0;
+      const txtL = isDark ? 100 : 0;
+
+      // Accents: Sharp, Neon, or 'Inter' style blues/indigos
+      const brandH = Math.floor(Math.random() * 360);
+      const primS = 90; // High saturation
+      const primL = 50;
+
+      const secH = (brandH + 30) % 360;
+      const secS = 80;
+      const secL = 60;
+
+      const accH = (brandH + 180) % 360;
+      const accS = 100; // Neon
+      const accL = 60;
+
+      newColors = {
+        text: hslToHex(txtH, txtS, txtL),
+        background: hslToHex(bgH, bgS, bgL),
+        primary: hslToHex(brandH, primS, primL),
+        secondary: hslToHex(secH, secS, secL),
+        accent: hslToHex(accH, accS, accL),
+      };
+    }
+
     setColors(newColors);
     applyTheme(newColors);
+    console.log(`Generated using ${strategyName} system`); // Helpful for debugging
   }
 
   const handleColorChange = (key, value) => {
@@ -232,6 +315,16 @@ function App() {
     ];
   }
 
+  // Determine best text color (black/white) for a given background hex
+  const getContrastColor = (hexColor) => {
+    const color = hexColor.startsWith('#') ? hexColor.substring(1) : hexColor;
+    const r = parseInt(color.substr(0, 2), 16);
+    const g = parseInt(color.substr(2, 2), 16);
+    const b = parseInt(color.substr(4, 2), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return yiq >= 128 ? 'black' : 'white';
+  }
+
   const currentPaletteArray = getPaletteArray(colors);
 
   const copyColor = (color) => {
@@ -255,18 +348,23 @@ function App() {
   }
 
   const navItems = [
-    { name: "Home", url: "#", icon: Home },
-    { name: "Generate", url: "#", icon: Palette },
-    { name: "Saved", url: "#", icon: Save },
+    { name: "Home", url: "#home", icon: Home },
+    { name: "Generate", url: "#generator", icon: Palette },
+    { name: "Saved", url: "#saved", icon: Save },
     { name: "Feedback", url: "#feedback", icon: Heart },
   ]
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 transition-colors duration-500">
       <AnimeNavBar items={navItems} defaultActive="Generate" theme={theme} toggleTheme={toggleTheme} />
-      <Hero onGenerate={generateRandomPalette} />
+      
+      <div id="home">
+        <Hero onGenerate={generateRandomPalette} />
+      </div>
 
-      <FeatureSection />
+      <div id="features">
+        <FeatureSection />
+      </div>
 
       <div id="generator" className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
         <h2 className="text-3xl font-bold mb-8 text-center text-foreground">Palette Generator</h2>
@@ -274,37 +372,28 @@ function App() {
         <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[80vh] min-h-[600px]">
           {/* Left: Palette Sidebar */}
           <div className="w-full lg:w-1/4 flex flex-row lg:flex-col rounded-3xl overflow-hidden shadow-2xl border border-border shrink-0">
-            {currentPaletteArray.map((colorObj, index) => (
-              <div
-                key={colorObj.key || index}
-                className="group relative flex-1 flex flex-col items-center justify-center transition-all duration-300 hover:flex-[1.5]"
-                style={{ backgroundColor: typeof colorObj === 'string' ? colorObj : colorObj.value }}
-              >
-                {/* Horizontal Layout (Mobile) / Vertical Layout (Desktop) content */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-2 p-2">
-                  <span className="text-white font-bold text-lg font-mono uppercase tracking-wider hidden lg:block">
-                    {typeof colorObj === 'string' ? colorObj : colorObj.value}
-                  </span>
-                  <div className="flex gap-1">
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white border-0"
-                      onClick={() => copyColor(typeof colorObj === 'string' ? colorObj : colorObj.value)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white border-0"
-                    >
-                      <Unlock className="h-4 w-4" />
-                    </Button>
+            {currentPaletteArray.map((colorObj, index) => {
+              const bgVal = typeof colorObj === 'string' ? colorObj : colorObj.value;
+              const textColor = getContrastColor(bgVal);
+              
+              return (
+                <div
+                  key={colorObj.key || index}
+                  className="group relative flex-1 flex flex-col items-center justify-center transition-all duration-300 hover:flex-[1.5]"
+                  style={{ backgroundColor: bgVal }}
+                >
+                  {/* Horizontal Layout (Mobile) / Vertical Layout (Desktop) content */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-2 p-2">
+                    <span className="font-bold text-lg font-mono uppercase tracking-wider hidden lg:block" style={{ color: textColor }}>
+                      {bgVal}
+                    </span>
+                    <div className="flex gap-1">
+                      <AnimatedCopyButton onClick={() => copyColor(bgVal)} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Right: Bento Visualization */}
@@ -314,7 +403,7 @@ function App() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      <div id="saved" className="container mx-auto px-4 py-12">
         {savedPalettes?.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-2xl font-bold">Saved Palettes ({savedPalettes.length})</h3>
