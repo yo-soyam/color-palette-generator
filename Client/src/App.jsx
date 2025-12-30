@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { Home, Palette, Save, Heart } from 'lucide-react'
+import { AnimeNavBar } from '@/components/ui/anime-navbar'
 
 function App() {
   const [palette, setPalette] = useState([])
@@ -58,19 +60,19 @@ function App() {
     alert(`Copied ${color} to clipboard!`)
   }
 
+  const navItems = [
+    { name: "Home", url: "#", icon: Home },
+    { name: "Generate", url: "#", icon: Palette },
+    { name: "Saved", url: "#", icon: Save },
+    { name: "Feedback", url: "#", icon: Heart },
+  ]
+
   return (
-    <div className="container">
+    <>
+      <AnimeNavBar items={navItems} defaultActive="Generate" theme={theme} toggleTheme={toggleTheme} />
+      <div className="container" style={{ paddingTop: '100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
         <h1 style={{ margin: 0 }}>🎨 Color Palette Generator</h1>
-        <button 
-          onClick={toggleTheme}
-          style={{ 
-            backgroundColor: theme === 'light' ? '#333' : '#fff', 
-            color: theme === 'light' ? '#fff' : '#333' 
-          }}
-        >
-          {theme === 'light' ? '🌙 Demo Theme' : '☀️ Light Mode'}
-        </button>
       </div>
 
       <div className="card">
@@ -127,7 +129,8 @@ function App() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
 
