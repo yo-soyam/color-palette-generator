@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils"
 import { Home, Palette, Save, Heart } from 'lucide-react'
 import { AnimeNavBar } from '@/components/ui/anime-navbar.tsx'
 import { FeedbackSection } from '@/components/FeedbackSection'
+import { ThankYouPage } from '@/components/ThankYouPage'
+import { MinimalFooter } from '@/components/MinimalFooter'
 
 function App() {
   const [colors, setColors] = useState({
@@ -238,6 +240,19 @@ function App() {
       .catch(err => console.error('Failed to copy:', err));
   };
 
+  useEffect(() => {
+    // Apply theme class to document element
+    const root = window.document.documentElement
+    root.classList.remove("light", "dark")
+    root.classList.add(theme)
+  }, [theme])
+
+  // Thank You Page Logic
+  const [showThankYou, setShowThankYou] = useState(false);
+
+  if (showThankYou) {
+    return <ThankYouPage onComplete={() => setShowThankYou(false)} />;
+  }
 
   const navItems = [
     { name: "Home", url: "#", icon: Home },
@@ -346,7 +361,9 @@ function App() {
         )}
       </div>
 
-      <FeedbackSection />
+      <FeedbackSection onSubmitSuccess={() => setShowThankYou(true)} />
+
+      <MinimalFooter />
 
       <Toolbar
         colors={colors}

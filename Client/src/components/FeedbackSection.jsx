@@ -3,7 +3,33 @@ import { Button } from './ui/button'
 import StarRating from './ui/StarRating'
 import { cn } from "@/lib/utils"
 
-export function FeedbackSection() {
+export function FeedbackSection({ onSubmitSuccess }) {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+            // Using 'no-cors' mode because the target API likely doesn't support CORS for localhost.
+            // This means we can SEND data, but we can't read the response (it will be opaque).
+            // We treat the attempt as successful (Fire & Forget).
+            await fetch(form.action, {
+                method: form.method,
+                body: formData,
+                mode: 'no-cors'
+            });
+
+            // With no-cors, we can't check response.ok (it's always false/opaque).
+            // So we assume it went through and trigger the success flow.
+            if (onSubmitSuccess) onSubmitSuccess();
+            form.reset();
+
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("Error submitting form. Please check your connection.");
+        }
+    };
+
     return (
         <section id="feedback" className="py-24 px-4 container mx-auto">
             <div className="max-w-2xl mx-auto bg-card border border-border rounded-3xl p-8 shadow-xl">
@@ -16,6 +42,7 @@ export function FeedbackSection() {
                     action="https://www.postpipe.in/api/public/submit/feedback-1"
                     method="POST"
                     className="space-y-6"
+                    onSubmit={handleSubmit}
                 >
                     <div className="space-y-2">
                         <label className="text-sm font-medium leading-none text-foreground block text-center mb-4">
