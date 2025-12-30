@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import AnimatedCopyButton from "@/components/ui/animated-copy-button";
 import { RefreshCw, Save, Undo, Redo, Copy, Lock, Unlock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -51,12 +52,12 @@ export function Toolbar({ colors, onGenerate, onSave, onColorChange }) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => { }} title="Undo (Coming Soon)">
-                        <Undo className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={() => { }} title="Redo (Coming Soon)">
-                        <Redo className="h-4 w-4" />
-                    </Button>
+                    <AnimatedCopyButton
+                        onClick={() => {
+                            const json = JSON.stringify(colors, null, 2);
+                            navigator.clipboard.writeText(json).then(() => alert('Palette JSON copied!'));
+                        }}
+                    />
 
                     <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-2"></div>
 

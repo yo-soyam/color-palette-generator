@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority"
+import { Copy } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -45,4 +46,18 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, ..
 })
 Button.displayName = "Button"
 
-export { Button, buttonVariants }
+// Explicit copy button that ensures icon visibility
+const CopyButton = React.forwardRef(({ className, variant = "ghost", size = "icon", ...props }, ref) => {
+    return (
+        <button 
+            className={cn(buttonVariants({ variant, size, className }))}
+            ref={ref}
+            {...props}
+        >
+            <Copy size={16} />
+        </button>
+    )
+})
+CopyButton.displayName = "CopyButton"
+
+export { Button, buttonVariants, CopyButton }
