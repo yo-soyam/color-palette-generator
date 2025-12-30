@@ -1,21 +1,38 @@
 import { useState, useEffect } from 'react'
+import { Hero } from '@/components/Hero'
+import { Toolbar } from '@/components/Toolbar'
+import { FeatureSection } from '@/components/FeatureSection'
+import { BentoPreview } from '@/components/BentoPreview'
+import { Button } from '@/components/ui/button'
+import { Copy, Plus, Minus, Lock, Unlock } from 'lucide-react'
+import { cn } from "@/lib/utils"
 
 function App() {
-  const [palette, setPalette] = useState([])
+  const [colors, setColors] = useState({
+    text: '#000000',
+    background: '#ffffff',
+    primary: '#3b82f6',
+    secondary: '#64748b',
+    accent: '#8b5cf6'
+  })
   const [savedPalettes, setSavedPalettes] = useState([])
   const [theme, setTheme] = useState('light')
 
   useEffect(() => {
-    document.body.setAttribute('data-theme', theme)
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'demo' : 'light')
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
   }
 
   useEffect(() => {
     fetchSavedPalettes()
-    generatePalette()
+    generateRandomPalette()
   }, [])
 
   const fetchSavedPalettes = async () => {
@@ -28,16 +45,126 @@ function App() {
     }
   }
 
-  const generatePalette = () => {
-    const colors = Array(5).fill(0).map(() =>
-      '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
-    )
-    setPalette(colors)
+  // Helper to convert hex to HSL for CSS variables
+  const hexToHsl = (hex) => {
+    let r = 0, g = 0, b = 0;
+    if (hex.length === 4) {
+      r = "0x" + hex[1] + hex[1];
+      g = "0x" + hex[2] + hex[2];
+      b = "0x" + hex[3] + hex[3];
+    } else if (hex.length === 7) {
+      r = "0x" + hex[1] + hex[2];
+      g = "0x" + hex[3] + hex[4];
+      b = "0x" + hex[5] + hex[6];
+    }
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    let cmin = Math.min(r, g, b),
+      cmax = Math.max(r, g, b),
+      delta = cmax - cmin,
+      h = 0,
+      s = 0,
+      l = 0;
+
+    if (delta === 0) h = 0;
+    else if (cmax === r) h = ((g - b) / delta) % 6;
+    else if (cmax === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+
+    l = (cmax + cmin) / 2;
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return `${h} ${s}% ${l}%`;
+  }
+
+  // HSL to Hex helper for generator
+  const hslToHex = (h, s, l) => {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  const applyTheme = (newColors) => {
+    const root = document.documentElement;
+
+    // Update ALL colors for Realtime Colors effect
+    root.style.setProperty('--background', hexToHsl(newColors.background));
+    root.style.setProperty('--foreground', hexToHsl(newColors.text));
+    root.style.setProperty('--primary', hexToHsl(newColors.primary));
+    root.style.setProperty('--secondary', hexToHsl(newColors.secondary));
+    root.style.setProperty('--accent', hexToHsl(newColors.accent));
+
+    // Update card/popover to blend or contrast
+    root.style.setProperty('--card', hexToHsl(newColors.background));
+    root.style.setProperty('--card-foreground', hexToHsl(newColors.text));
+    root.style.setProperty('--popover', hexToHsl(newColors.background));
+    root.style.setProperty('--popover-foreground', hexToHsl(newColors.text));
+  }
+
+  const generateRandomPalette = () => {
+    // Semantic generation logic
+    const isDark = theme === 'dark';
+
+    // Background: High lightness for light mode, low for dark
+    const bgH = Math.floor(Math.random() * 360);
+    const bgS = Math.floor(Math.random() * 20); // Low saturation for bg
+    const bgL = isDark ? Math.floor(Math.random() * 15) + 5 : Math.floor(Math.random() * 10) + 90;
+
+    // Text: Contrast to background
+    const txtH = (bgH + 180) % 360;
+    const txtS = Math.floor(Math.random() * 20);
+    const txtL = isDark ? Math.floor(Math.random() * 10) + 90 : Math.floor(Math.random() * 15) + 5;
+
+    // Primary: Vibrant
+    const primH = Math.floor(Math.random() * 360);
+    const primS = Math.floor(Math.random() * 40) + 60; // High saturation
+    const primL = Math.floor(Math.random() * 40) + 30; // Medium lightness
+
+    // Secondary: Complementary or Split
+    const secH = (primH + 180) % 360;
+    const secS = Math.floor(Math.random() * 30) + 40;
+    const secL = Math.floor(Math.random() * 30) + 40;
+
+    // Accent: Analogous or Triadic
+    const accH = (primH + 30) % 360;
+    const accS = Math.floor(Math.random() * 40) + 60;
+    const accL = Math.floor(Math.random() * 30) + 50;
+
+    const newColors = {
+      text: hslToHex(txtH, txtS, txtL),
+      background: hslToHex(bgH, bgS, bgL),
+      primary: hslToHex(primH, primS, primL),
+      secondary: hslToHex(secH, secS, secL),
+      accent: hslToHex(accH, accS, accL),
+    };
+    setColors(newColors);
+    applyTheme(newColors);
+  }
+
+  const handleColorChange = (key, value) => {
+    const newColors = { ...colors, [key]: value };
+    setColors(newColors);
+    applyTheme(newColors);
   }
 
   const savePalette = async () => {
     try {
-      await fetch('/api/palettes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ colors: palette, name: `Palette ${savedPalettes.length + 1}` }) }).then(res => res.json())
+      await fetch('/api/palettes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ colors, name: `Palette ${savedPalettes.length + 1}` })
+      }).then(res => res.json())
       fetchSavedPalettes()
     } catch (error) {
       console.error('Error:', error)
@@ -53,80 +180,131 @@ function App() {
     }
   }
 
-  const copyColor = (color) => {
-    navigator.clipboard.writeText(color)
-    alert(`Copied ${color} to clipboard!`)
+  // Helper to get array for display from either object or array (legacy support)
+  const getPaletteArray = (paletteColors) => {
+    if (Array.isArray(paletteColors)) return paletteColors;
+    return [
+      { key: 'text', value: paletteColors.text, name: 'Text' },
+      { key: 'background', value: paletteColors.background, name: 'Background' },
+      { key: 'primary', value: paletteColors.primary, name: 'Primary' },
+      { key: 'secondary', value: paletteColors.secondary, name: 'Secondary' },
+      { key: 'accent', value: paletteColors.accent, name: 'Accent' }
+    ];
   }
 
+  const currentPaletteArray = getPaletteArray(colors);
+
+  const copyColor = (color) => {
+    navigator.clipboard.writeText(color)
+      .then(() => alert(`Copied ${color} to clipboard!`))
+      .catch(err => console.error('Failed to copy:', err));
+  };
+
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
-        <h1 style={{ margin: 0 }}>🎨 Color Palette Generator</h1>
-        <button 
-          onClick={toggleTheme}
-          style={{ 
-            backgroundColor: theme === 'light' ? '#333' : '#fff', 
-            color: theme === 'light' ? '#fff' : '#333' 
-          }}
-        >
-          {theme === 'light' ? '🌙 Demo Theme' : '☀️ Light Mode'}
-        </button>
-      </div>
+    <div className="min-h-screen bg-background text-foreground pb-32 transition-colors duration-500">
+      <Hero onGenerate={generateRandomPalette} />
 
-      <div className="card">
-        <h2>Current Palette</h2>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          {palette.map((color, i) => (
-            <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+      <FeatureSection />
+
+      <div id="generator" className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
+        <h2 className="text-3xl font-bold mb-8 text-center text-foreground">Palette Generator</h2>
+
+        <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[80vh] min-h-[600px]">
+          {/* Left: Palette Sidebar */}
+          <div className="w-full lg:w-1/4 flex flex-row lg:flex-col rounded-3xl overflow-hidden shadow-2xl border border-border shrink-0">
+            {currentPaletteArray.map((colorObj, index) => (
               <div
-                style={{
-                  height: '150px',
-                  backgroundColor: color,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  border: '2px solid #ddd'
-                }}
-                onClick={() => copyColor(color)}
-              />
-              <p style={{ margin: '10px 0', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                {color}
-              </p>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={generatePalette} style={{ flex: 1 }}>🔄 Generate New</button>
-          <button onClick={savePalette} style={{ flex: 1, backgroundColor: 'var(--success-color)' }}>💾 Save Palette</button>
+                key={colorObj.key || index}
+                className="group relative flex-1 flex flex-col items-center justify-center transition-all duration-300 hover:flex-[1.5]"
+                style={{ backgroundColor: typeof colorObj === 'string' ? colorObj : colorObj.value }}
+              >
+                {/* Horizontal Layout (Mobile) / Vertical Layout (Desktop) content */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-2 p-2">
+                  <span className="text-white font-bold text-lg font-mono uppercase tracking-wider hidden lg:block">
+                    {typeof colorObj === 'string' ? colorObj : colorObj.value}
+                  </span>
+                  <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white border-0"
+                      onClick={() => copyColor(typeof colorObj === 'string' ? colorObj : colorObj.value)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white border-0"
+                    >
+                      <Unlock className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Right: Bento Visualization */}
+          <div className="flex-1 bg-card/30 rounded-3xl border border-border p-2 shadow-inner">
+            <BentoPreview />
+          </div>
         </div>
       </div>
 
-      {savedPalettes?.length > 0 && (
-        <div className="card">
-          <h2>Saved Palettes ({savedPalettes.length})</h2>
-          {savedPalettes.map(p => (
-            <div key={p.id} style={{ marginBottom: '15px', padding: '15px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
-                {p.colors.map((color, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      flex: 1,
-                      height: '60px',
-                      backgroundColor: color,
-                      borderRadius: '4px',
-                      cursor: 'pointer'
+      <div className="container mx-auto px-4 py-12">
+        {savedPalettes?.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold">Saved Palettes ({savedPalettes.length})</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedPalettes.map(p => (
+                <div key={p.id} className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex h-16 rounded-md overflow-hidden mb-4 cursor-pointer" onClick={() => {
+                    if (!Array.isArray(p.colors)) {
+                      setColors(p.colors);
+                    } else {
+                      setColors({
+                        text: p.colors[0],
+                        background: p.colors[1],
+                        primary: p.colors[2],
+                        secondary: p.colors[3],
+                        accent: p.colors[4],
+                      })
+                    }
+                    document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+                  }}>
+                    {(Array.isArray(p.colors) ? p.colors : [p.colors.text, p.colors.background, p.colors.primary, p.colors.secondary, p.colors.accent]).map((color, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 h-full"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePalette(p.id);
                     }}
-                    onClick={() => copyColor(color)}
-                  />
-                ))}
-              </div>
-              <button onClick={() => deletePalette(p.id)} style={{ backgroundColor: 'var(--danger-color)', width: '100%' }}>
-                Delete
-              </button>
+                  >
+                    Delete Palette
+                  </Button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
+
+      <Toolbar
+        colors={colors}
+        onGenerate={generateRandomPalette}
+        onSave={savePalette}
+        onColorChange={handleColorChange}
+      />
     </div>
   )
 }
