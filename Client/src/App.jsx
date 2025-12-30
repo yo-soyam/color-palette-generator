@@ -6,6 +6,8 @@ import { BentoPreview } from '@/components/BentoPreview'
 import { Button } from '@/components/ui/button'
 import { Copy, Plus, Minus, Lock, Unlock } from 'lucide-react'
 import { cn } from "@/lib/utils"
+import { Home, Palette, Save, Heart } from 'lucide-react'
+import { AnimeNavBar } from '@/components/ui/anime-navbar'
 
 function App() {
   const [colors, setColors] = useState({
@@ -199,6 +201,15 @@ function App() {
       .then(() => alert(`Copied ${color} to clipboard!`))
       .catch(err => console.error('Failed to copy:', err));
   };
+    alert(`Copied ${color} to clipboard!`)
+  }
+
+  const navItems = [
+    { name: "Home", url: "#", icon: Home },
+    { name: "Generate", url: "#", icon: Palette },
+    { name: "Saved", url: "#", icon: Save },
+    { name: "Feedback", url: "#", icon: Heart },
+  ]
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32 transition-colors duration-500">
@@ -249,6 +260,37 @@ function App() {
           <div className="flex-1 bg-card/30 rounded-3xl border border-border p-2 shadow-inner">
             <BentoPreview />
           </div>
+    <>
+      <AnimeNavBar items={navItems} defaultActive="Generate" theme={theme} toggleTheme={toggleTheme} />
+      <div className="container" style={{ paddingTop: '100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
+        <h1 style={{ margin: 0 }}>🎨 Color Palette Generator</h1>
+      </div>
+
+      <div className="card">
+        <h2>Current Palette</h2>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          {palette.map((color, i) => (
+            <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+              <div
+                style={{
+                  height: '150px',
+                  backgroundColor: color,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  border: '2px solid #ddd'
+                }}
+                onClick={() => copyColor(color)}
+              />
+              <p style={{ margin: '10px 0', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                {color}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={generatePalette} style={{ flex: 1 }}>🔄 Generate New</button>
+          <button onClick={savePalette} style={{ flex: 1, backgroundColor: 'var(--success-color)' }}>💾 Save Palette</button>
         </div>
       </div>
 
@@ -306,6 +348,35 @@ function App() {
         onColorChange={handleColorChange}
       />
     </div>
+      {savedPalettes?.length > 0 && (
+        <div className="card">
+          <h2>Saved Palettes ({savedPalettes.length})</h2>
+          {savedPalettes.map(p => (
+            <div key={p.id} style={{ marginBottom: '15px', padding: '15px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+                {p.colors.map((color, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: '60px',
+                      backgroundColor: color,
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => copyColor(color)}
+                  />
+                ))}
+              </div>
+              <button onClick={() => deletePalette(p.id)} style={{ backgroundColor: 'var(--danger-color)', width: '100%' }}>
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      </div>
+    </>
   )
 }
 
